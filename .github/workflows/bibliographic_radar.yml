@@ -1,0 +1,79 @@
+name: "📡 Radar Bibliográfico Médico Semanal"
+
+on:
+  schedule:
+    # Lunes a las 07:00 UTC (08:00 CET / 09:00 CEST España peninsular - franja valle de Google AI Studio)
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "Perfil a ejecutar ('all', 'test_connection', o nombre del perfil como 'medicina_interna')"
+        required: true
+        default: "all"
+        type: string
+      days:
+        description: "Días hacia atrás a consultar en PubMed (por defecto: 7)"
+        required: false
+        default: "7"
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  run_medical_radar:
+    name: "Ejecutar Vigilancia Bibliográfica PICO + IIC"
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
+      SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+      EMAIL_TO: ${{ secrets.EMAIL_TO }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - name: "Checkout del repositorio"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "Configurar Python 3.11 (Standard Library Only)"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: "Modo Diagnóstico: Verificar conexión con PubMed, Gemini y canales (test_connection)"
+        if: ${{ github.event.inputs.profile == 'test_connection' }}
+        run: |
+          python3 src/fetch_pubmed.py --test-connection --summary-file "$GITHUB_STEP_SUMMARY"
+
+      - name: "Ejecutar Radar Bibliográfico (Producción)"
+        if: ${{ github.event.inputs.profile != 'test_connection' }}
+        env:
+          TARGET_PROFILE: ${{ github.event.inputs.profile || 'all' }}
+          LOOKBACK_DAYS: ${{ github.event.inputs.days || '7' }}
+        run: |
+          python3 src/fetch_pubmed.py \
+            --profile "$TARGET_PROFILE" \
+            --days "$LOOKBACK_DAYS" \
+            --summary-file "$GITHUB_STEP_SUMMARY"
+
+      - name: "Persistir historial de PMIDs enviados (data/sent_pmids.json)"
+        if: ${{ github.event.inputs.profile != 'test_connection' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/sent_pmids.json
+          if git diff --cached --quiet; then
+            echo "Sin nuevos PMIDs que registrar en data/sent_pmids.json."
+          else
+            git commit -m "[skip ci] Actualizar historial de PMIDs procesados"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
