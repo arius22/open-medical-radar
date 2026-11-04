@@ -1,0 +1,215 @@
+name: "⚙️ Procesar Alta de Perfil Médico (No-Code)"
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  register_profile:
+    name: "Generar Perfil JSON desde Issue Form"
+    if: contains(github.event.issue.labels.*.name, 'nuevo-perfil')
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout del repositorio"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "Configurar Python 3.11"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: "Parsear Issue y generar perfil en config/"
+        id: create_profile
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_USER: ${{ github.event.issue.user.login }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          python3 - << 'EOF'
+          import json
+          import os
+          import re
+          import sys
+
+          body = os.environ.get("ISSUE_BODY", "") or ""
+          username = os.environ.get("ISSUE_USER", "facultativo") or "facultativo"
+          safe_user = re.sub(r"[^a-zA-Z0-9_-]", "", username.lower()) or "medico"
+
+          def extract_section(text, heading_substring):
+              pattern = rf"###\s+[^\n]*{re.escape(heading_substring)}[^\n]*\n+([\s\S]*?)(?=\n###\s+|\Z)"
+              match = re.search(pattern, text, flags=re.IGNORECASE)
+              if not match:
+                  return ""
+              val = match.group(1).strip()
+              if val in ("_No response_", "No response", "None"):
+                  return ""
+              return val
+
+          doctor_name = extract_section(body, "Nombre completo del médico") or f"Dr/a. {username}"
+          specialty = extract_section(body, "Especialidad Clínica") or "Medicina Interna"
+          base_preset = extract_section(body, "Preset base a cargar") or "medicina_interna"
+          channel_raw = extract_section(body, "Canal de notificación") or "Ambos (Email + Telegram)"
+          recipient_raw = extract_section(body, "Destinatario específico")
+          extra_journals_raw = extract_section(body, "Revistas adicionales")
+          custom_exclusions_raw = extract_section(body, "Exclusiones específicas")
+
+          preset_map = {
+              "medicina interna": "medicina_interna",
+              "infecciosas": "enfermedades_infecciosas",
+              "enfermedades infecciosas": "enfermedades_infecciosas",
+              "cirugía general": "cirugia_general",
+              "cirugia general": "cirugia_general",
+              "cardiología": "cardiologia",
+              "cardiologia": "cardiologia",
+          }
+
+          preset_slug = re.sub(r"[^a-z0-9_]", "", base_preset.strip().lower())
+          if preset_slug not in ("medicina_interna", "enfermedades_infecciosas", "cirugia_general", "cardiologia"):
+              preset_slug = preset_map.get(specialty.strip().lower(), "medicina_interna")
+
+          preset_path = os.path.join("config", "presets", f"{preset_slug}.json")
+          if not os.path.exists(preset_path):
+              preset_path = os.path.join("config", "presets", "medicina_interna.json")
+
+          with open(preset_path, "r", encoding="utf-8") as f:
+              config_data = json.load(f)
+
+          specialty_slug = re.sub(r"[^a-z0-9]+", "_", specialty.strip().lower()).strip("_") or preset_slug
+          profile_id = f"{safe_user}_{specialty_slug}"
+          config_data["profile_id"] = profile_id
+          config_data["profile_name"] = f"{doctor_name} ({specialty})"
+          config_data["specialty"] = specialty
+          config_data["created_by_github_user"] = username
+
+          channel_lower = channel_raw.lower()
+          if "ambos" in channel_lower or ("email" in channel_lower and "telegram" in channel_lower):
+              config_data["notification_channel"] = "both"
+          elif "telegram" in channel_lower:
+              config_data["notification_channel"] = "telegram"
+          else:
+              config_data["notification_channel"] = "email"
+
+          if recipient_raw:
+              for token in re.split(r"[,;\s]+", recipient_raw.strip()):
+                  token = token.strip()
+                  if "@" in token:
+                      config_data["recipient_email"] = token
+                  elif re.match(r"^-?\d+$", token):
+                      config_data["telegram_chat_id"] = token
+
+          if extra_journals_raw:
+              extras = [
+                  j.strip()
+                  for j in re.split(r"[\n,]+", extra_journals_raw)
+                  if j.strip() and j.strip() != "_No response_"
+              ]
+              existing_lower = {j.lower() for j in config_data.get("journals", [])}
+              for j in extras:
+                  if j.lower() not in existing_lower:
+                      config_data.setdefault("journals", []).append(j)
+                      existing_lower.add(j.lower())
+
+          if custom_exclusions_raw:
+              excl = [
+                  e.strip()
+                  for e in re.split(r"[\n,]+", custom_exclusions_raw)
+                  if e.strip() and e.strip() != "_No response_"
+              ]
+              existing_excl = {e.lower() for e in config_data.get("exclusions", [])}
+              for e in excl:
+                  if e.lower() not in existing_excl:
+                      config_data.setdefault("exclusions", []).append(e)
+                      existing_excl.add(e.lower())
+
+          output_file = os.path.join("config", f"{profile_id}.json")
+          with open(output_file, "w", encoding="utf-8") as f:
+              json.dump(config_data, f, indent=2, ensure_ascii=False)
+              f.write("\n")
+
+          print(f"Generated profile file: {output_file}")
+          github_output = os.environ.get("GITHUB_OUTPUT")
+          if github_output:
+              with open(github_output, "a", encoding="utf-8") as out:
+                  out.write(f"profile_file={output_file}\n")
+                  out.write(f"profile_id={profile_id}\n")
+          EOF
+
+      - name: "Commit y Push del nuevo perfil a main"
+        env:
+          ISSUE_USER: ${{ github.event.issue.user.login }}
+          PROFILE_FILE: ${{ steps.create_profile.outputs.profile_file }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$PROFILE_FILE"
+          if git diff --cached --quiet; then
+            echo "El perfil no presenta cambios respecto a main."
+          else
+            git commit -m "[skip ci] Registrado perfil de ${ISSUE_USER}"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+
+      - name: "Comentar y cerrar Issue automáticamente"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          PROFILE_FILE: ${{ steps.create_profile.outputs.profile_file }}
+        run: |
+          python3 - << 'EOF'
+          import json
+          import os
+          import urllib.request
+          import urllib.error
+
+          token = os.environ["GH_TOKEN"]
+          repo = os.environ["REPO"]
+          issue_number = os.environ["ISSUE_NUMBER"]
+          profile_file = os.environ.get("PROFILE_FILE", "config/perfil.json")
+
+          headers = {
+              "Authorization": f"Bearer {token}",
+              "Accept": "application/vnd.github+json",
+              "Content-Type": "application/json",
+              "User-Agent": "open-medical-radar-bot"
+          }
+
+          comment_text = (
+              "Perfil configurado con éxito. Tu radar se ejecutará automáticamente el próximo lunes a las 07:00 UTC.\n\n"
+              f"- **Archivo generado:** `{profile_file}`\n"
+              "- **Prueba inmediata opcional:** Puedes ir a la pestaña **Actions → Radar Bibliográfico Médico Semanal → Run workflow** para lanzar tu primer boletín ahora mismo."
+          )
+
+          comment_url = f"https://api.github.com/repos/{repo}/issues/{issue_number}/comments"
+          req_comment = urllib.request.Request(
+              comment_url,
+              data=json.dumps({"body": comment_text}).encode("utf-8"),
+              headers=headers,
+              method="POST"
+          )
+          try:
+              with urllib.request.urlopen(req_comment, timeout=20) as resp:
+                  print(f"Comentario publicado (HTTP {resp.status}).")
+          except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as exc:
+              print(f"Error al publicar comentario: {exc}")
+
+          close_url = f"https://api.github.com/repos/{repo}/issues/{issue_number}"
+          req_close = urllib.request.Request(
+              close_url,
+              data=json.dumps({"state": "closed"}).encode("utf-8"),
+              headers=headers,
+              method="PATCH"
+          )
+          try:
+              with urllib.request.urlopen(req_close, timeout=20) as resp:
+                  print(f"Issue #{issue_number} cerrada (HTTP {resp.status}).")
+          except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as exc:
+              print(f"Error al cerrar la issue: {exc}")
+          EOF
