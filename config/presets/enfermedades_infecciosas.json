@@ -1,0 +1,85 @@
+{
+  "profile_id": "enfermedades_infecciosas",
+  "profile_name": "Enfermedades Infecciosas y PROA",
+  "specialty": "Enfermedades Infecciosas",
+  "notification_channel": "both",
+  "recipient_email": "",
+  "telegram_chat_id": "",
+  "days_lookback": 7,
+  "landmark_lookback_days": 14,
+  "max_landmark_calls": 4,
+  "max_regular_calls": 8,
+  "journals": [
+    "Clinical Infectious Diseases",
+    "The Lancet Infectious Diseases",
+    "Journal of Antimicrobial Chemotherapy",
+    "Antimicrobial Agents and Chemotherapy",
+    "Open Forum Infectious Diseases",
+    "Enfermedades Infecciosas y Microbiologia Clinica",
+    "New England Journal of Medicine",
+    "Lancet"
+  ],
+  "ground_journals": [
+    "New England Journal of Medicine",
+    "Lancet",
+    "The Lancet Infectious Diseases",
+    "Clinical Infectious Diseases"
+  ],
+  "journal_weights": {
+    "New England Journal of Medicine": 100,
+    "Lancet": 98,
+    "The Lancet Infectious Diseases": 95,
+    "Clinical Infectious Diseases": 92,
+    "Journal of Antimicrobial Chemotherapy": 84,
+    "Antimicrobial Agents and Chemotherapy": 82,
+    "Open Forum Infectious Diseases": 76,
+    "Enfermedades Infecciosas y Microbiologia Clinica": 75
+  },
+  "focus_keywords": [
+    "infective endocarditis",
+    "bacteremia",
+    "staphylococcus aureus",
+    "multidrug-resistant",
+    "carbapenem-resistant",
+    "antimicrobial stewardship",
+    "pk/pd",
+    "pharmacokinetics",
+    "pharmacodynamics",
+    "osteomyelitis",
+    "prosthetic joint infection",
+    "meningitis",
+    "hiv",
+    "immunocompromised",
+    "opat",
+    "nosocomial infection"
+  ],
+  "translational_allowlist": [
+    "pk/pd",
+    "pharmacokinetic",
+    "pharmacodynamic",
+    "monte carlo simulation",
+    "time above mic",
+    "auc/mic"
+  ],
+  "exclusions": [
+    "pure in vitro",
+    "basic microbiology without clinical correlation",
+    "mechanical orthopedics",
+    "non-endocarditis cardiology",
+    "murine",
+    "zebrafish",
+    "plant pathology"
+  ],
+  "clinical_exclusions_description": [
+    "Microbiología in vitro sin correlación clínica (salvo PK/PD traslacional)",
+    "Ortopedia mecánica sin infección",
+    "Cardiología no endocardítica"
+  ],
+  "categories": [
+    "Endocarditis/Bacteriemia",
+    "Multirresistentes/PROA/PK-PD",
+    "Infección SNC/Osteoarticular",
+    "Inmunodeprimido/VIH",
+    "Infección Nosocomial/OPAT"
+  ]
+}
