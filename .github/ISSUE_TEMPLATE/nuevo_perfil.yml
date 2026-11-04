@@ -1,0 +1,91 @@
+name: "🩺 Crear Nuevo Perfil de Vigilancia Bibliográfica"
+description: "Configura en 1 minuto tu radar médico semanal personalizado (No-Code, sin tocar programación)."
+title: "[NUEVO PERFIL] "
+labels: ["nuevo-perfil"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Bienvenido a Open Medical Radar
+        Rellena este breve formulario para activar tu radar bibliográfico semanal automatizado.
+        Al pulsar **Submit new issue**, el sistema creará automáticamente tu archivo de configuración personalizado en `config/` y cerrará esta solicitud confirmando tu alta.
+
+  - type: input
+    id: doctor_name
+    attributes:
+      label: "Nombre completo del médico y servicio hospitalario"
+      description: "Indica tu nombre/alias clínico y tu servicio o centro hospitalario (se mostrará en la cabecera de tu boletín)."
+      placeholder: "Ej. Dr. Antonio Terrón - Medicina Interna (CHOP / Hospital do Salnés)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: specialty
+    attributes:
+      label: "Especialidad Clínica"
+      description: "Selecciona tu especialidad principal."
+      options:
+        - "Medicina Interna"
+        - "Infecciosas"
+        - "Cirugía General"
+        - "Cardiología"
+        - "Personalizado"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: base_preset
+    attributes:
+      label: "Preset base a cargar"
+      description: "Plantilla preconfigurada de revistas de alto impacto, categorías clínicas y filtros metodológicos."
+      options:
+        - "medicina_interna"
+        - "enfermedades_infecciosas"
+        - "cirugia_general"
+        - "cardiologia"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: notification_channel
+    attributes:
+      label: "Canal de notificación"
+      description: "Elige por dónde deseas recibir el informe semanal los lunes a las 08:00 AM."
+      options:
+        - "Ambos (Email + Telegram)"
+        - "Email"
+        - "Telegram"
+    validations:
+      required: true
+
+  - type: input
+    id: recipient_destination
+    attributes:
+      label: "Destinatario específico (Opcional: Email o Chat ID de Telegram)"
+      description: "Si deseas usar un correo específico para este perfil (distinto al secreto global EMAIL_TO) o un Chat ID concreto de Telegram, indícalo aquí. Si lo dejas en blanco se usarán los Secrets globales del repositorio."
+      placeholder: "Ej. medico@hospital.es o 123456789 (opcional)"
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra_journals
+    attributes:
+      label: "Revistas adicionales a monitorizar (Opcional)"
+      description: "Escribe una revista por línea o separadas por comas (nombre oficial en PubMed) si deseas añadirlas al preset base."
+      placeholder: |
+        Chest
+        Critical Care Medicine
+    validations:
+      required: false
+
+  - type: textarea
+    id: custom_exclusions
+    attributes:
+      label: "Exclusiones específicas o temas a descartar (Opcional)"
+      description: "Términos en inglés o español (separados por comas o uno por línea) que deseas descartar antes del análisis PICO."
+      placeholder: |
+        pediatric
+        oncology phase 1
+        animal model
+    validations:
+      required: false
