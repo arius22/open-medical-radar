@@ -1,0 +1,66 @@
+{
+  "profile_id": "cirugia_general",
+  "profile_name": "Cirugía General y del Aparato Digestivo",
+  "specialty": "Cirugía General",
+  "notification_channel": "both",
+  "recipient_email": "",
+  "telegram_chat_id": "",
+  "days_lookback": 7,
+  "landmark_lookback_days": 14,
+  "max_landmark_calls": 4,
+  "max_regular_calls": 8,
+  "journals": [
+    "Annals of Surgery",
+    "British Journal of Surgery",
+    "JAMA Surgery",
+    "Surgery",
+    "Colorectal Disease",
+    "Hernia"
+  ],
+  "ground_journals": [
+    "Annals of Surgery",
+    "British Journal of Surgery",
+    "JAMA Surgery"
+  ],
+  "journal_weights": {
+    "Annals of Surgery": 96,
+    "JAMA Surgery": 94,
+    "British Journal of Surgery": 92,
+    "Surgery": 82,
+    "Colorectal Disease": 80,
+    "Hernia": 76
+  },
+  "focus_keywords": [
+    "minimally invasive",
+    "laparoscopic",
+    "robotic surgery",
+    "open surgery",
+    "anastomotic leak",
+    "clavien-dindo",
+    "reoperation",
+    "postoperative morbidity",
+    "colorectal surgery",
+    "abdominal wall",
+    "incisional hernia",
+    "enhanced recovery",
+    "eras"
+  ],
+  "exclusions": [
+    "screening colonoscopy",
+    "simple diagnostic endoscopy",
+    "purely cosmetic surgery",
+    "in vitro",
+    "animal model"
+  ],
+  "clinical_exclusions_description": [
+    "Colonoscopias simples de cribado sin intervención quirúrgica",
+    "Modelos animales experimentales sin traslación quirúrgica directa"
+  ],
+  "categories": [
+    "Mínimamente Invasivo vs Abierto",
+    "Dehiscencia de Anastomosis y Morbilidad (Clavien-Dindo)",
+    "Cirugía Colorrectal y Oncológica",
+    "Pared Abdominal y Hernia Compleja",
+    "Urgencias Quirúrgicas y Reintervención"
+  ]
+}
