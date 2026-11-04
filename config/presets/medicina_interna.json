@@ -1,0 +1,74 @@
+{
+  "profile_id": "medicina_interna",
+  "profile_name": "Medicina Interna Hospitalaria",
+  "specialty": "Medicina Interna",
+  "notification_channel": "both",
+  "recipient_email": "",
+  "telegram_chat_id": "",
+  "days_lookback": 7,
+  "landmark_lookback_days": 14,
+  "max_landmark_calls": 4,
+  "max_regular_calls": 8,
+  "journals": [
+    "New England Journal of Medicine",
+    "Lancet",
+    "JAMA",
+    "Annals of Internal Medicine",
+    "BMJ",
+    "European Journal of Internal Medicine",
+    "American Journal of Medicine"
+  ],
+  "ground_journals": [
+    "New England Journal of Medicine",
+    "Lancet",
+    "JAMA",
+    "Annals of Internal Medicine",
+    "BMJ"
+  ],
+  "journal_weights": {
+    "New England Journal of Medicine": 100,
+    "Lancet": 98,
+    "JAMA": 95,
+    "Annals of Internal Medicine": 90,
+    "BMJ": 88,
+    "European Journal of Internal Medicine": 78,
+    "American Journal of Medicine": 75
+  },
+  "focus_keywords": [
+    "heart failure",
+    "venous thromboembolism",
+    "pulmonary embolism",
+    "multimorbidity",
+    "frailty",
+    "polypharmacy",
+    "autoimmune",
+    "vasculitis",
+    "systemic lupus",
+    "hospitalist",
+    "internal medicine",
+    "randomized controlled trial",
+    "meta-analysis"
+  ],
+  "exclusions": [
+    "elective orthopedic surgery",
+    "pure trauma",
+    "pediatric neonatology",
+    "pure refractory icu",
+    "extracorporeal membrane oxygenation",
+    "in vitro",
+    "murine model",
+    "animal study"
+  ],
+  "categories": [
+    "Pluripatología/Fragilidad",
+    "Insuficiencia Cardíaca",
+    "Enfermedad Tromboembólica",
+    "Autoinmune/Sistémicas",
+    "Diagnóstico/Clínica General"
+  ],
+  "clinical_exclusions_description": [
+    "Cirugía electiva ortopédica",
+    "Trauma puro",
+    "UCI refractaria pura"
+  ]
+}
