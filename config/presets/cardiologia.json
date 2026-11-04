@@ -1,0 +1,67 @@
+{
+  "profile_id": "cardiologia",
+  "profile_name": "Cardiología Clínica e Intervencionista",
+  "specialty": "Cardiología",
+  "notification_channel": "both",
+  "recipient_email": "",
+  "telegram_chat_id": "",
+  "days_lookback": 7,
+  "landmark_lookback_days": 14,
+  "max_landmark_calls": 4,
+  "max_regular_calls": 8,
+  "journals": [
+    "Circulation",
+    "Journal of the American College of Cardiology",
+    "European Heart Journal",
+    "JAMA Cardiology",
+    "New England Journal of Medicine",
+    "Lancet"
+  ],
+  "ground_journals": [
+    "New England Journal of Medicine",
+    "Lancet",
+    "Circulation",
+    "Journal of the American College of Cardiology",
+    "European Heart Journal"
+  ],
+  "journal_weights": {
+    "New England Journal of Medicine": 100,
+    "Lancet": 98,
+    "European Heart Journal": 96,
+    "Circulation": 95,
+    "Journal of the American College of Cardiology": 95,
+    "JAMA Cardiology": 90
+  },
+  "focus_keywords": [
+    "acute coronary syndrome",
+    "myocardial infarction",
+    "heart failure",
+    "hfpef",
+    "hfref",
+    "tavi",
+    "tavr",
+    "transcatheter aortic valve",
+    "atrial fibrillation",
+    "arrhythmia",
+    "anticoagulation",
+    "direct oral anticoagulant"
+  ],
+  "exclusions": [
+    "non-cardiac surgery",
+    "basic electrophysiology in vitro",
+    "murine model",
+    "animal study",
+    "pediatric congenital isolated case report"
+  ],
+  "clinical_exclusions_description": [
+    "Estudios básicos celulares o animales sin resultados clínicos",
+    "Casos clínicos aislados sin impacto terapéutico"
+  ],
+  "categories": [
+    "Síndrome Coronario Agudo (SCA)",
+    "Insuficiencia Cardíaca",
+    "Cardiopatía Estructural y TAVI",
+    "Arritmias y Anticoagulación",
+    "Prevención Cardiovascular y Lípidos"
+  ]
+}
